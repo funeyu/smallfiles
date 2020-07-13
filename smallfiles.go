@@ -6,9 +6,19 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
-	"smallfiles/util"
 	"strconv"
 )
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
 
 type blockInfo struct {
 	block Block
@@ -37,7 +47,7 @@ type SmallFiles struct {
 func Init(directory string, sf SmallDataFormat, cap int) *SmallFiles {
 	fs := make(map[uint8]*os.File, 0)
 	maxNums := make(map[uint8] uint32, 0)
-	es, err := util.PathExists(directory)
+	es, err := PathExists(directory)
 	if err != nil {
 		return nil
 	}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"sync"
 )
 
 func PathExists(path string) (bool, error) {
@@ -226,6 +227,10 @@ func (s *SmallFiles) AppendBytes(bytes []byte, fileId uint8, blockNum int) error
 }
 
 func (s *SmallFiles) AppendDatas(datas []SmallData, fileId uint8, blockNum int) error {
+	var lock sync.Mutex
+	lock.Lock()
+	defer lock.Unlock()
+
 	block, err := s.GetBlock(fileId, blockNum)
 	if err != nil {
 		return err

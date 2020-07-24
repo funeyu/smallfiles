@@ -6,7 +6,15 @@ import (
 )
 
 /**
-	先假定block的容量大小就是1mb，不允许某个smallData的添加超过该限制
+	动态大小的block：
+	block开始大小：128kb(type: 1)
+	block开始大小：256kb(type: 2)
+	block开始大小：512kb(type: 3)
+	block开始大小：1024kb(type: 4)
+	block开始大小：2048kb(type: 5)
+总体实现思路：
+根据一开始数据大小选择不同类型的block，如选择了256kb的block，再在上面追加数据的时候如果超出了block大小，新建一个同一大小的block和之前的
+形成链，每个初始block的文件偏移会被记录
 */
 
 const (

@@ -14,9 +14,10 @@ type Article struct {
 	desc string
 }
 
-func (a *Article) Size() uint32 {
+
+func (a *Article) Size() int {
 	total := len(a.id) + len(a.title) + len(a.favicon) + len(a.desc) + 6
-	return uint32(total)
+	return total
 }
 
 func (a *Article) Serialize() []byte {
@@ -25,9 +26,8 @@ func (a *Article) Serialize() []byte {
 	return bytes
 }
 
-
-func TestInit(t *testing.T) {
-	sf := Init("./test/", func(bytes []byte) SmallData {
+func TestSmallFiles_AppendDatas(t *testing.T) {
+	s := Init("./test", func(bytes []byte) SmallData {
 		str := string(bytes)
 		ss := strings.Split(str, "##")
 		art := &Article{
@@ -38,6 +38,7 @@ func TestInit(t *testing.T) {
 		}
 		return art
 	}, 1)
+
 	art := &Article{
 		id:      "12",
 		title:   "测试title",
@@ -50,11 +51,11 @@ func TestInit(t *testing.T) {
 		favicon: "测试fff",
 		desc:    "desc",
 	}
-	sf.FillDatas([]SmallData {art, art1}, 0)
+	s.FillDatas([]SmallData{art, art1}, 0)
 }
 
-func TestSmallFiles_RefillDatas(t *testing.T) {
-	sf := Open("./test/", func(bytes []byte) SmallData {
+func TestSmallFiles_GetBlock(t *testing.T) {
+	s := Open("./test/", func(bytes []byte) SmallData {
 		str := string(bytes)
 		ss := strings.Split(str, "##")
 		art := &Article{
@@ -65,24 +66,43 @@ func TestSmallFiles_RefillDatas(t *testing.T) {
 		}
 		return art
 	})
-	art := &Article{
-		id:      "1221",
-		title:   "测试title",
-		favicon: "测试favicon图标",
-		desc:    "测试描述",
+
+	var ss []SmallData
+	for i:=0; i < 500 ; i ++ {
+		a := &Article{
+			id:      "132323323332",
+			title:   "测试一把title再长一些好不好好不好好不好好不好好不好好不好好不好测试一把title再长一些好不好好不好好不好好不好好不好好不好好不好",
+			favicon: "测试fff",
+			desc:    "desc",
+		}
+		ss = append(ss, a)
 	}
-	art1 := &Article{
-		id:      "1331",
-		title:   "测试一把",
-		favicon: "测试fff",
-		desc:    "desc",
-	}
-	sf.RefillDatas([]SmallData {art, art1}, 0, 1)
-	data, _ := sf.GetBlock(0, 1)
-	for _, d := range data.Datas {
-		art := d.(*Article)
-		fmt.Println("data:", art)
-	}
+	s.AppendDatas(ss, 0, METABS)
 }
+
+func TestOpen(t *testing.T) {
+	s := Open("./test/", func(bytes []byte) SmallData {
+		str := string(bytes)
+		ss := strings.Split(str, "##")
+		art := &Article{
+			id:      ss[0],
+			title:   ss[1],
+			favicon: ss[2],
+			desc:    ss[3],
+		}
+		return art
+	})
+
+	bs, _ := s.GetBlockArray(0, int64(METABS))
+	total := 0
+	for _, d := range bs {
+		for _, da := range d.Datas {
+			fmt.Println("b", da)
+			total = total + 1
+		}
+	}
+	fmt.Println("total", total)
+}
+
 
 
